@@ -1,0 +1,33 @@
+{
+  "name": "postcss-media-hover-any-hover",
+  "version": "0.0.0",
+  "description": "PostCSS plugin wraps selectors with :hover with an @media (hover: hover) block",
+  "keywords": ["postcss", "css", "postcss-plugin", "postcss-media-hover-any-hover"],
+  "scripts": {
+    "unit": "node --test index.test.js",
+    "test": "npm run unit && eslint ."
+  },
+  "author": "hiro <hiro0218@gmail.com>",
+  "license": "MIT",
+  "repository": "hiro0218/postcss-media-hover-any-hover",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.27"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "postcss": "^8.4.27"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "extends": ["eslint:recommended"]
+  }
+}
