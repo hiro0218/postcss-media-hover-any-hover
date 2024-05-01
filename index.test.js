@@ -1,19 +1,20 @@
-const postcss = require('postcss')
-const { equal } = require('node:assert')
-const { test } = require('node:test')
+const postcss = require('postcss');
+const { equal } = require('node:assert');
+const { test } = require('node:test');
 
-const plugin = require('./')
+const plugin = require('./');
 
 async function run(input, output, opts = {}) {
-  let result = await postcss([plugin(opts)]).process(input, { from: undefined })
-  equal(result.css, output)
-  equal(result.warnings().length, 0)
+  let result = await postcss([plugin(opts)]).process(input, {
+    from: undefined,
+  });
+  equal(result.css, output);
+  equal(result.warnings().length, 0);
 }
 
-/* Write tests here
-
 test('does something', async () => {
-  await run('a{ }', 'a{ }', { })
-})
-
-*/
+  await run(
+    'a { &:hover{ text-decoration: underline } }',
+    'a { @media (hover: hover) { &:hover{ text-decoration: underline } } }',
+  );
+});
