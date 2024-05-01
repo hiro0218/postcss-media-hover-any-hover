@@ -1,6 +1,6 @@
 {
   "name": "postcss-media-hover-any-hover",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "PostCSS plugin wraps selectors with :hover with an @media (hover: hover) block",
   "keywords": [
     "postcss",
@@ -9,13 +9,21 @@
     "any-hover",
     "postcss-media-hover-any-hover"
   ],
+  "main": "index.js",
   "scripts": {
     "unit": "node --test index.test.js",
     "test": "npm run unit && eslint ."
   },
   "author": "hiro",
   "license": "MIT",
-  "repository": "hiro0218/postcss-media-hover-any-hover",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiro0218/postcss-media-hover-any-hover.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hiro0218/postcss-media-hover-any-hover/issues"
+  },
+  "homepage": "https://github.com/hiro0218/postcss-media-hover-any-hover#readme",
   "engines": {
     "node": "20.11.0"
   },
