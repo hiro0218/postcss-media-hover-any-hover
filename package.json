@@ -13,7 +13,7 @@
     "unit": "node --test index.test.js",
     "test": "npm run unit && eslint ."
   },
-  "author": "hiro <hiro0218@gmail.com>",
+  "author": "hiro",
   "license": "MIT",
   "repository": "hiro0218/postcss-media-hover-any-hover",
   "engines": {
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "eslint": "^8.47.0",
-    "postcss": "^8.4.27",
+    "postcss": "^8.4.38",
     "prettier": "3.2.5"
   },
   "eslintConfig": {
