@@ -35,7 +35,7 @@ module.exports = () => {
         }
 
         // hoverセレクタをラップする@mediaルールを作成
-        const atRule = new AtRule({ name: 'media', params: '(hover: hover)' });
+        const atRule = new AtRule({ name: 'media', params: '(any-hover: hover)' });
 
         // 非hoverセレクタがある場合、ルールを複製してhover @mediaを前に追加
         // それ以外の場合、ルールを@mediaブロックで置き換える

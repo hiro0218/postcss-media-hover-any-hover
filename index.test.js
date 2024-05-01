@@ -15,6 +15,6 @@ async function run(input, output, opts = {}) {
 test('does something', async () => {
   await run(
     'a { &:hover{ text-decoration: underline } }',
-    'a { @media (hover: hover) { &:hover{ text-decoration: underline } } }',
+    'a { @media (any-hover: hover) { &:hover{ text-decoration: underline } } }',
   );
 });
