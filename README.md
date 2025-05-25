@@ -98,11 +98,9 @@ a {
 }
 
 // Output
-@media (min-width: 768px) {
-  @media (any-hover: hover) {
-    a:hover {
-      color: purple;
-    }
+@media (any-hover: hover) {
+  a:hover {
+    color: purple;
   }
 }
 ```
