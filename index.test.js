@@ -12,9 +12,23 @@ async function run(input, output, opts = {}) {
   equal(result.warnings().length, 0);
 }
 
-test('does something', async () => {
+test('wraps hover selector with @media', async () => {
   await run(
     'a { &:hover{ text-decoration: underline } }',
     'a { @media (any-hover: hover) { &:hover{ text-decoration: underline } } }',
+  );
+});
+
+test('does not modify CSS without hover selectors', async () => {
+  await run(
+    'a { color: blue; }',
+    'a { color: blue; }',
+  );
+});
+
+test('handles mixed hover and non-hover selectors', async () => {
+  await run(
+    'a { color: blue; &:hover { color: red; } }',
+    'a { color: blue; @media (any-hover: hover) { &:hover { color: red; } } }',
   );
 });
