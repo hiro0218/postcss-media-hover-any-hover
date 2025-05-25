@@ -4,6 +4,31 @@
 npm i -D postcss-media-hover-any-hover
 ```
 
+### PostCSS Config
+
+`postcss.config.js`:
+
+```js
+module.exports = {
+  plugins: [
+    require('postcss-media-hover-any-hover')()
+  ]
+};
+```
+
+### JavaScript API
+
+```js
+const fs = require('fs');
+const postcss = require('postcss');
+const postcssMediaHoverAnyHover = require('postcss-media-hover-any-hover');
+
+const css = fs.readFileSync('input.css', 'utf8');
+
+const output = postcss().use(postcssMediaHoverAnyHover()).process(css).css;
+```
+
+
 ## Usage
 
 This plugin automatically wraps rules containing `:hover` selectors with `@media (any-hover: hover)`.
@@ -103,30 +128,4 @@ a {
     color: purple;
   }
 }
-```
-
-## Configuration Examples
-
-### PostCSS Config
-
-`postcss.config.js`:
-
-```js
-module.exports = {
-  plugins: [
-    require('postcss-media-hover-any-hover')()
-  ]
-};
-```
-
-### JavaScript API
-
-```js
-const fs = require('fs');
-const postcss = require('postcss');
-const postcssMediaHoverAnyHover = require('postcss-media-hover-any-hover');
-
-const css = fs.readFileSync('input.css', 'utf8');
-
-const output = postcss().use(postcssMediaHoverAnyHover()).process(css).css;
 ```
