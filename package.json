@@ -1,6 +1,6 @@
 {
   "name": "postcss-media-hover-any-hover",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "PostCSS plugin wraps selectors with :hover with an @media (any-hover: hover) block",
   "keywords": [
     "postcss",
