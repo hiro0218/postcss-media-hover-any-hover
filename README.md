@@ -1,3 +1,17 @@
+# postcss-media-hover-any-hover
+
+[![npm version](https://img.shields.io/npm/v/postcss-media-hover-any-hover.svg?style=flat-square)](https://www.npmjs.com/package/postcss-media-hover-any-hover)
+[![npm downloads](https://img.shields.io/npm/dm/postcss-media-hover-any-hover.svg?style=flat-square)](https://www.npmjs.com/package/postcss-media-hover-any-hover)
+
+postcss-media-hover-any-hover is a PostCSS plugin that automatically wraps CSS `:hover` selectors with `@media (any-hover: hover)` blocks.
+This prevents unintended hover effects (the so-called "sticky hover" problem) on touch and hybrid devices, ensuring that hover styles are only applied on devices where a pointing device (like a mouse) is available.
+
+- Desktop (with mouse): Hover effects are enabled
+- Smartphones/Tablets: Hover effects are disabled
+- Hybrid devices (e.g., Surface): Hover effects are enabled only when a mouse is connected
+
+By using this plugin, you can achieve optimal hover behavior for each device type without sacrificing CSS maintainability.
+
 ## Install
 
 ```bash
@@ -34,14 +48,14 @@ This ensures hover effects only apply on devices that support hover functionalit
 ### Basic Example
 
 ```css
-// Input
+/* Input */
 a {
   &:hover {
     text-decoration: underline;
   }
 }
 
-// Output
+/* Output */
 a {
   @media (any-hover: hover) {
     &:hover {
@@ -54,12 +68,13 @@ a {
 ### Multiple Selectors Example
 
 ```css
-// Input
-a:hover, button:hover {
+/* Input */
+a:hover,
+button:hover {
   color: red;
 }
 
-// Output
+/* Output */
 @media (any-hover: hover) {
   a:hover,
   button:hover {
@@ -71,7 +86,7 @@ a:hover, button:hover {
 ### Mixed Selectors Example
 
 ```css
-// Input
+/* Input */
 a {
   color: blue;
   &:hover {
@@ -79,7 +94,7 @@ a {
   }
 }
 
-// Output
+/* Output */
 a {
   color: blue;
   @media (any-hover: hover) {
@@ -93,14 +108,14 @@ a {
 ### Nested Selectors Example
 
 ```css
-// Input
+/* Input */
 .container {
   .button:hover {
     color: blue;
   }
 }
 
-// Output
+/* Output */
 .container {
   @media (any-hover: hover) {
     .button:hover {
@@ -113,14 +128,14 @@ a {
 ### Combining with Existing Media Queries
 
 ```css
-// Input
+/* Input */
 @media (min-width: 768px) {
   a:hover {
     color: purple;
   }
 }
 
-// Output
+/* Output */
 @media (min-width: 768px) {
   @media (any-hover: hover) {
     a:hover {
