@@ -13,6 +13,7 @@
   "scripts": {
     "unit": "node --test index.test.js",
     "test": "npm run unit && eslint .",
+    "perf": "node --test performance.test.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky"

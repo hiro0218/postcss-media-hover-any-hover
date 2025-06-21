@@ -20,10 +20,7 @@ test('wraps hover selector with @media', async () => {
 });
 
 test('does not modify CSS without hover selectors', async () => {
-  await run(
-    'a { color: blue; }',
-    'a { color: blue; }',
-  );
+  await run('a { color: blue; }', 'a { color: blue; }');
 });
 
 test('handles mixed hover and non-hover selectors', async () => {
@@ -76,10 +73,7 @@ test('handles multiple rules with some containing hover selectors', async () => 
 });
 
 test('handles hover with pseudo elements', async () => {
-  await run(
-    'a:hover::after { content: "→"; }',
-    '@media (any-hover: hover) {a:hover::after { content: "→"; } }',
-  );
+  await run('a:hover::after { content: "→"; }', '@media (any-hover: hover) {a:hover::after { content: "→"; } }');
 });
 
 test('handles hover with animation properties', async () => {
@@ -97,17 +91,37 @@ test('handles multiple nested layers of hover selectors', async () => {
 });
 
 test('handles future options compatibility', async () => {
-  // オプションを渡しても現状の動作は変わらない（将来的な拡張性のテスト）
-  await run(
-    'a:hover { color: orange; }',
-    '@media (any-hover: hover) {a:hover { color: orange; } }',
-    { /* 将来的なオプションの例 */ }
-  );
+  // Current behavior doesn't change even when passing options (testing for future extensibility)
+  await run('a:hover { color: orange; }', '@media (any-hover: hover) {a:hover { color: orange; } }', {
+    /* Example of future options */
+  });
 });
 
 test('processes hover selector already inside @media (any-hover: hover)', async () => {
   await run(
     '@media (any-hover: hover) { a:hover { color: purple; } }',
     '@media (any-hover: hover) { a:hover { color: purple; } }',
+  );
+});
+
+test('supports mediaFeature option', async () => {
+  await run('a:hover { color: green; }', '@media (hover: hover) {a:hover { color: green; } }', {
+    mediaFeature: 'hover',
+  });
+});
+
+test('supports transformNestedMedia option', async () => {
+  await run(
+    '@media (any-hover: hover) { a:hover { color: purple; } }',
+    '@media (any-hover: hover) { @media (any-hover: hover) { a:hover { color: purple; } } }',
+    { transformNestedMedia: true },
+  );
+});
+
+test('supports excludeSelectors option', async () => {
+  await run(
+    '.special:hover { color: red; } a:hover { color: blue; }',
+    '.special:hover { color: red; } @media (any-hover: hover) { a:hover { color: blue; } }',
+    { excludeSelectors: ['.special:hover'] },
   );
 });
