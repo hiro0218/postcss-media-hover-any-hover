@@ -2,18 +2,18 @@ const js = require('@eslint/js');
 const globals = require('globals');
 
 module.exports = [
-  // eslint:recommended の設定をインポート
+  // Import eslint:recommended configuration
   js.configs.recommended,
-  // プロジェクト固有の設定
+  // Project-specific configuration
   {
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
-      // Node.jsとES6のグローバル変数を追加
+      // Add Node.js and ES6 global variables
       globals: {
         ...globals.node,
         ...globals.es2021,
-        // カスタムグローバル変数があれば追加
+        // Add custom global variables if needed
       },
     },
     files: ['**/*.js'],
