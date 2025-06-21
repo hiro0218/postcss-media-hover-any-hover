@@ -91,9 +91,9 @@ test('handles multiple nested layers of hover selectors', async () => {
 });
 
 test('handles future options compatibility', async () => {
-  // オプションを渡しても現状の動作は変わらない（将来的な拡張性のテスト）
+  // Current behavior doesn't change even when passing options (testing for future extensibility)
   await run('a:hover { color: orange; }', '@media (any-hover: hover) {a:hover { color: orange; } }', {
-    /* 将来的なオプションの例 */
+    /* Example of future options */
   });
 });
 

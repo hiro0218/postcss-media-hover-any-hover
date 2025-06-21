@@ -180,3 +180,31 @@ postcss().use(
   }),
 );
 ```
+
+## Performance
+
+This plugin is optimized to work fast and efficiently:
+
+- Early returns to avoid unnecessary processing
+- Optimized regular expression patterns
+- Data structures for fast lookups
+- Memory usage optimization
+
+The plugin performs well even with large CSS files. To run performance tests:
+
+```bash
+npm run perf
+```
+
+### Performance Test Results Example
+
+```
+# Small CSS (145 characters)
+Average execution time: 0.15ms/iteration
+
+# Medium CSS (about 20k characters)
+Average execution time: 1.81ms/iteration
+
+# Large CSS (about 170k characters)
+Average execution time: 19.99ms/iteration
+```

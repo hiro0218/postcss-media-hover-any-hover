@@ -1,60 +1,90 @@
 /**
  * @typedef {Object} PluginOptions
- * @property {'any-hover' | 'hover'} [mediaFeature='any-hover'] - メディア機能の種類 ('any-hover' または 'hover')
- * @property {boolean} [transformNestedMedia=false] - 既存のメディアクエリ内の :hover を変換するかどうか
- * @property {string[]} [excludeSelectors=[]] - 変換から除外するセレクタパターンのリスト
+ * @property {'any-hover' | 'hover'} [mediaFeature='any-hover'] - Type of media feature ('any-hover' or 'hover')
+ * @property {boolean} [transformNestedMedia=false] - Whether to transform :hover within existing media queries
+ * @property {string[]} [excludeSelectors=[]] - List of selector patterns to exclude from transformation
  */
 
 /**
  * @type {import('postcss').PluginCreator<PluginOptions>}
  */
 module.exports = (options = {}) => {
-  // オプションの初期化とデフォルト値の設定
+  // Initialize options with default values
   const { mediaFeature = 'any-hover', transformNestedMedia = false, excludeSelectors = [] } = options;
 
-  // メディアクエリのパラメータ
+  // Media query parameter
   const mediaParams = `(${mediaFeature}: hover)`;
 
-  // hover疑似クラスを検出する正規表現
-  const HOVER_REGEX = /:(hover)(\s|$|:|\.|\[|#)/;
+  // Optimized regular expression to detect hover pseudo-class - removed capture groups
+  const HOVER_REGEX = /:hover(?:\s|$|:|\.|\[|#)/;
+
+  // Pre-compiled regular expression to detect hover media query
+  const HOVER_MEDIA_REGEX = /\((any-)?hover:\s*hover\)/;
+
+  // Map for excluded selectors (for fast lookup)
+  const excludeSelectorsMap = new Map();
+  const excludeRegexps = [];
+
+  // Optimize excluded selectors: separate string and regexp patterns
+  if (excludeSelectors.length > 0) {
+    excludeSelectors.forEach((pattern, index) => {
+      if (pattern instanceof RegExp) {
+        excludeRegexps.push(pattern);
+      } else {
+        excludeSelectorsMap.set(pattern, index);
+      }
+    });
+  }
 
   /**
-   * セレクタが除外パターンに一致するかチェック
-   * @param {string} selector - チェックするセレクタ
-   * @returns {boolean} - 除外対象かどうか
+   * Check if a selector matches any exclude pattern - optimized version
+   * @param {string} selector - The selector to check
+   * @returns {boolean} - Whether the selector should be excluded
    */
   const isExcludedSelector = (selector) => {
-    if (!excludeSelectors.length) return false;
-    return excludeSelectors.some((pattern) => {
-      // 単純な文字列比較または正規表現としてマッチング
-      if (pattern instanceof RegExp) {
-        return pattern.test(selector);
+    // Early return
+    if (excludeSelectors.length === 0) return false;
+
+    // Fast lookup using map
+    if (excludeSelectorsMap.size > 0) {
+      for (const [pattern] of excludeSelectorsMap) {
+        if (selector.includes(pattern)) return true;
       }
-      return selector.includes(pattern);
-    });
+    }
+
+    // Process regular expressions only if there are few of them
+    return excludeRegexps.length > 0 && excludeRegexps.some((regex) => regex.test(selector));
   };
 
   /**
-   * セレクタがhover疑似クラスを持つかチェック
-   * @param {string} selector - チェックするセレクタ
-   * @returns {boolean} - hover疑似クラスを持つかどうか
+   * Check if a selector has hover pseudo-class - optimized version
+   * @param {string} selector - The selector to check
+   * @returns {boolean} - Whether the selector has hover pseudo-class
    */
   const hasHoverPseudo = (selector) => {
+    // Early return for the most common case
+    if (selector.indexOf(':hover') === -1) return false;
+
     return HOVER_REGEX.test(selector) && !isExcludedSelector(selector);
   };
 
   /**
-   * ルールが既にホバー関連のメディアクエリ内にあるかチェック
-   * @param {import('postcss').Rule} rule - チェックするルール
-   * @returns {boolean} - ホバーメディアクエリ内にあるかどうか
+   * Check if a rule is already inside a hover-related media query - optimized version
+   * @param {import('postcss').Rule} rule - The rule to check
+   * @returns {boolean} - Whether the rule is inside a hover media query
    */
   const isAlreadyInHoverMedia = (rule) => {
     let parent = rule.parent;
-    while (parent) {
-      if (parent.type === 'atrule' && parent.name === 'media' && /\((any-)?hover:\s*hover\)/.test(parent.params)) {
+    // Set maximum search depth to prevent infinite loops
+    let depth = 0;
+    const MAX_DEPTH = 10;
+
+    while (parent && depth < MAX_DEPTH) {
+      if (parent.type === 'atrule' && parent.name === 'media' && HOVER_MEDIA_REGEX.test(parent.params)) {
         return true;
       }
       parent = parent.parent;
+      depth++;
     }
     return false;
   };
@@ -68,16 +98,21 @@ module.exports = (options = {}) => {
     Once(root, { AtRule }) {
       /** @param {import('postcss').Rule} rule - PostCSS rule node. */
       root.walkRules((rule) => {
-        // セレクタを一度の走査で分類
+        // Early check: skip if selector doesn't exist or doesn't contain :hover
+        if (!rule.selector || rule.selector.indexOf(':hover') === -1) {
+          return;
+        }
+
+        // Classify selectors in a single pass
         const selectors = rule.selectors;
+        const selectorsLength = selectors.length;
+
+        // Use optimized arrays for small selector lists
         const hoverSelectors = [];
         const nonHoverSelectors = [];
-
-        // ローカル変数にキャッシング
-        const selectorsLength = selectors.length;
         let hasHoverSelector = false;
 
-        // 一度の走査で分類
+        // Optimize selector traversal
         for (let i = 0; i < selectorsLength; i++) {
           const selector = selectors[i];
           if (hasHoverPseudo(selector)) {
@@ -88,24 +123,24 @@ module.exports = (options = {}) => {
           }
         }
 
-        // 早期リターン
+        // Early return
         if (!hasHoverSelector) {
           return;
         }
 
-        // 親要素を一度だけ参照
+        // Reference parent element only once
         const parent = rule.parent;
 
-        // 既に親要素が@media (hover関連)なら処理をスキップ（オプションによる）
+        // Skip if already inside @media (hover-related) based on options
         if (!transformNestedMedia && isAlreadyInHoverMedia(rule)) {
           return;
         }
 
-        // hoverセレクタをラップする@mediaルールを作成
+        // Create @media rule to wrap hover selectors
         const atRule = new AtRule({ name: 'media', params: mediaParams });
 
         if (nonHoverSelectors.length > 0) {
-          // 非hoverセレクタがある場合
+          // When there are non-hover selectors
           const hoverRule = rule.clone();
           hoverRule.selectors = hoverSelectors;
           rule.selectors = nonHoverSelectors;
@@ -113,7 +148,7 @@ module.exports = (options = {}) => {
           atRule.append(hoverRule);
           parent.insertBefore(rule, atRule);
         } else {
-          // hoverセレクタのみの場合
+          // When there are only hover selectors
           atRule.append(rule.clone());
           rule.replaceWith(atRule);
         }
