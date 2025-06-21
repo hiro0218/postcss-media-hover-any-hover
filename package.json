@@ -31,21 +31,11 @@
     "postcss": "^8.4.27"
   },
   "devDependencies": {
-    "eslint": "^8.47.0",
+    "@eslint/js": "^9.29.0",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0",
     "postcss": "^8.4.38",
     "prettier": "3.2.5"
-  },
-  "eslintConfig": {
-    "parserOptions": {
-      "ecmaVersion": 2022
-    },
-    "env": {
-      "node": true,
-      "es6": true
-    },
-    "extends": [
-      "eslint:recommended"
-    ]
   },
   "prettier": {
     "printWidth": 120,
