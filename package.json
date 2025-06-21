@@ -12,7 +12,10 @@
   "main": "index.js",
   "scripts": {
     "unit": "node --test index.test.js",
-    "test": "npm run unit && eslint ."
+    "test": "npm run unit && eslint .",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "author": "hiro",
   "license": "MIT",
@@ -34,6 +37,8 @@
     "@eslint/js": "^9.29.0",
     "eslint": "^9.29.0",
     "globals": "^16.2.0",
+    "husky": "^9.1.7",
+    "nano-staged": "^0.8.0",
     "postcss": "^8.4.38",
     "prettier": "3.2.5"
   },
@@ -42,5 +47,14 @@
     "trailingComma": "all",
     "singleQuote": true,
     "semi": true
+  },
+  "nano-staged": {
+    "*.js": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
