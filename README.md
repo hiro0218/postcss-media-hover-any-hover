@@ -10,9 +10,7 @@ npm i -D postcss-media-hover-any-hover
 
 ```js
 module.exports = {
-  plugins: [
-    require('postcss-media-hover-any-hover')()
-  ]
+  plugins: [require('postcss-media-hover-any-hover')()],
 };
 ```
 
@@ -27,7 +25,6 @@ const css = fs.readFileSync('input.css', 'utf8');
 
 const output = postcss().use(postcssMediaHoverAnyHover()).process(css).css;
 ```
-
 
 ## Usage
 
@@ -64,7 +61,8 @@ a:hover, button:hover {
 
 // Output
 @media (any-hover: hover) {
-  a:hover, button:hover {
+  a:hover,
+  button:hover {
     color: red;
   }
 }
@@ -130,4 +128,55 @@ a {
     }
   }
 }
+```
+
+### Plugin Options
+
+This plugin accepts the following options:
+
+```js
+postcssMediaHoverAnyHover({
+  // 'any-hover' or 'hover', default: 'any-hover'
+  mediaFeature: 'any-hover',
+
+  // Whether to transform :hover within existing media queries, default: false
+  transformNestedMedia: false,
+
+  // Exclude specific selector patterns, default: []
+  excludeSelectors: ['.no-transform:hover'],
+});
+```
+
+#### `mediaFeature` Option
+
+Choose between `'any-hover'` (default) and `'hover'`:
+
+- `'any-hover'`: Uses `@media (any-hover: hover)` which checks if any input device supports hover
+- `'hover'`: Uses `@media (hover: hover)` which only checks if the primary input device supports hover
+
+```js
+// Using hover instead of any-hover
+postcss().use(postcssMediaHoverAnyHover({ mediaFeature: 'hover' }));
+```
+
+#### `transformNestedMedia` Option
+
+Controls whether to transform `:hover` selectors that are already inside a media query:
+
+```js
+// Transform :hover even when already inside media queries
+postcss().use(postcssMediaHoverAnyHover({ transformNestedMedia: true }));
+```
+
+#### `excludeSelectors` Option
+
+Specify selectors that should not be transformed:
+
+```js
+// Exclude specific selectors from transformation
+postcss().use(
+  postcssMediaHoverAnyHover({
+    excludeSelectors: ['.no-transform:hover', '.special-button:hover'],
+  }),
+);
 ```
