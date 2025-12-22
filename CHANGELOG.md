@@ -86,4 +86,4 @@ The `transformNestedMedia` option has been removed. The plugin now always preven
 
 ## [0.4.0]
 
-Initial release with basic functionality.
+Introduced basic plugin functionality to wrap :hover selectors in @media (any-hover: hover) blocks.
