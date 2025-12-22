@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.0] - Unreleased
+## [0.5.0]
 
 ### Breaking Changes
 
@@ -84,6 +84,6 @@ The `transformNestedMedia` option has been removed. The plugin now always preven
 - Improved `:not(:hover)` detection to handle nested parentheses
 - Enhanced HOVER_REGEX to properly detect combinators
 
-## [0.4.0] - 2024-03-XX
+## [0.4.0]
 
 Initial release with basic functionality.
