@@ -97,12 +97,15 @@ module.exports = (options = {}) => {
         // Early return for the most common case
         if (selector.indexOf(':hover') === -1) return false;
 
-        // Check if :hover is inside :not() - handles one level of nested parentheses
-        // Supported examples (one level of nesting around :hover):
-        //   :not(:hover)           ✓
-        //   :not(.foo:hover)       ✓
-        //   :not(:is(.foo):hover)  ✓
-        // Not supported (deeply nested around :hover, multiple parenthesis levels):
+        // Check if :hover is inside :not() and ignore those selectors.
+        // The pattern below allows **one level of parentheses nesting inside the :not(...) argument**
+        // around :hover (e.g. :not(:is(.foo):hover)), but does not allow multiple nested
+        // parenthesis levels inside :not(...).
+        // Supported examples (one level of nesting inside :not(...)):
+        //   :not(:hover)                ✓
+        //   :not(.foo:hover)            ✓
+        //   :not(:is(.foo):hover)       ✓  // :hover is wrapped once by :is(...)
+        // Not supported (multiple nested parenthesis levels inside :not(...)):
         //   :not(:is(:where(.foo)):hover)  ✗ (extremely rare in practice)
         if (/:not\((?:[^()]*|\([^)]*\))*:hover(?:[^()]*|\([^)]*\))*\)/.test(selector)) {
           return false;

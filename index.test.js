@@ -113,11 +113,15 @@ test('supports mediaFeature option', async () => {
 test('ignores transformNestedMedia option (removed in v0.5.0)', async () => {
   // The transformNestedMedia option is silently ignored (no warning issued)
   // to maintain backward compatibility for users who still have it in their config
-  await run(
+  const result = await postcss([plugin({ transformNestedMedia: true })]).process(
     '@media (any-hover: hover) { a:hover { color: purple; } }',
-    '@media (any-hover: hover) { a:hover { color: purple; } }',
-    { transformNestedMedia: true }, // Option is silently ignored
+    { from: undefined },
   );
+
+  // Verify no warnings are issued (silent ignore)
+  equal(result.warnings().length, 0);
+  // Verify transformation still works correctly
+  equal(result.css, '@media (any-hover: hover) { a:hover { color: purple; } }');
 });
 
 test('supports excludeSelectors option', async () => {
