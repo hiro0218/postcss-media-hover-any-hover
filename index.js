@@ -102,12 +102,12 @@ module.exports = (options = {}) => {
         // around :hover (e.g. :not(:is(.foo):hover)), and supports multiple such single-level
         // parenthesis groups, but does not allow deeper nested parenthesis levels inside :not(...).
         // Supported examples (single-level groups inside :not(...)):
-        //   :not(:hover)                     ✓
-        //   :not(.foo:hover)                 ✓
-        //   :not(:is(.foo):hover)            ✓  // :hover is wrapped once by :is(...)
-        //   :not(:is(.a):is(.b):hover)       ✓  // multiple single-level :is() groups
+        //   :not(:hover)                     [supported]
+        //   :not(.foo:hover)                 [supported]
+        //   :not(:is(.foo):hover)            [supported]  // :hover is wrapped once by :is(...)
+        //   :not(:is(.a):is(.b):hover)       [supported]  // multiple single-level :is() groups
         // Not supported (deeper nested parenthesis levels inside :not(...)):
-        //   :not(:is(:where(.foo)):hover)    ✗ (extremely rare in practice)
+        //   :not(:is(:where(.foo)):hover)    [not supported] (extremely rare in practice)
         if (/:not\((?:[^()]*|\([^)]*\))*:hover(?:[^()]*|\([^)]*\))*\)/.test(selector)) {
           return false;
         }
@@ -186,7 +186,9 @@ module.exports = (options = {}) => {
           // NOTE: Assign to `selector` string instead of `selectors` array for performance.
           // Updating `selectors` forces PostCSS to re-parse and re-serialize the selector list
           // multiple times, while assigning a joined string to `selector` does it in one pass.
-          // This optimization reduces selector parsing from ~3 passes to 1 pass.
+          // This optimization reduces selector parsing from ~3 passes to 1 pass. In practice, this
+          // difference is most noticeable for rules with many comma-separated selectors; for a single
+          // selector the performance impact is negligible, but this approach keeps behavior equivalent.
           hoverRule.selector = hoverSelectors.join(', ');
           rule.selector = nonHoverSelectors.join(', ');
 
