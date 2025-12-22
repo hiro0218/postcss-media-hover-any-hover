@@ -98,8 +98,12 @@ module.exports = (options = {}) => {
         if (selector.indexOf(':hover') === -1) return false;
 
         // Check if :hover is inside :not() - handles one level of nested parentheses
-        // Covers: :not(:hover), :not(.foo:hover), :not(:is(.foo):hover)
-        // Does not cover: deeply nested cases like :not(:is(:where(.foo)):hover) (extremely rare)
+        // Supported examples (one level of nesting around :hover):
+        //   :not(:hover)           ✓
+        //   :not(.foo:hover)       ✓
+        //   :not(:is(.foo):hover)  ✓
+        // Not supported (deeply nested around :hover, multiple parenthesis levels):
+        //   :not(:is(:where(.foo)):hover)  ✗ (extremely rare in practice)
         if (/:not\((?:[^()]*|\([^)]*\))*:hover(?:[^()]*|\([^)]*\))*\)/.test(selector)) {
           return false;
         }
@@ -175,6 +179,10 @@ module.exports = (options = {}) => {
         if (nonHoverSelectors.length > 0) {
           // When there are non-hover selectors
           const hoverRule = rule.clone();
+          // NOTE: Assign to `selector` string instead of `selectors` array for performance.
+          // Updating `selectors` forces PostCSS to re-parse and re-serialize the selector list
+          // multiple times, while assigning a joined string to `selector` does it in one pass.
+          // This optimization reduces selector parsing from ~3 passes to 1 pass.
           hoverRule.selector = hoverSelectors.join(', ');
           rule.selector = nonHoverSelectors.join(', ');
 

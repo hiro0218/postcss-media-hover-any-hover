@@ -111,10 +111,12 @@ test('supports mediaFeature option', async () => {
 });
 
 test('ignores transformNestedMedia option (removed in v0.5.0)', async () => {
+  // The transformNestedMedia option is silently ignored (no warning issued)
+  // to maintain backward compatibility for users who still have it in their config
   await run(
     '@media (any-hover: hover) { a:hover { color: purple; } }',
     '@media (any-hover: hover) { a:hover { color: purple; } }',
-    { transformNestedMedia: true }, // Option is ignored, no warning
+    { transformNestedMedia: true }, // Option is silently ignored
   );
 });
 

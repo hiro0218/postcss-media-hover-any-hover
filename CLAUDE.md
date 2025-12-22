@@ -17,12 +17,12 @@ postcss-media-hover-any-hover is a PostCSS plugin that automatically wraps CSS `
 - Use RegExp patterns for substring matching: `excludeSelectors: [/:hover/]`
 - Performance improved from O(n·m) to O(1) for string patterns
 
-**CSS Cascade Order** (index.js:193):
+**CSS Cascade Order** (index.js:190):
 
 - Changed from `insertBefore` to `insertAfter` to preserve correct CSS cascade order
 - Mixed selectors now output non-hover rules first, then media query
 
-**:not(:hover) Detection** (index.js:118):
+**:not(:hover) Detection** (index.js:107):
 
 - Added regex check to prevent transforming `:not(:hover)` selectors
 - Pattern: `/:not\([^)]*:hover[^)]*\)/`
@@ -153,9 +153,9 @@ The plugin is implemented in `index.js` as a PostCSS plugin. Key architectural d
 - Prevents double-wrapping
 - Uses depth limit to prevent infinite loops
 
-**isExcludedSelector(selector)** (index.js:44-57):
+**isExcludedSelector(selector)** (index.js:76-89):
 
-- Fast lookup using Map for string patterns
+- Fast lookup using Set for string patterns
 - Separate handling for RegExp patterns
 - Early return for empty exclude list
 
