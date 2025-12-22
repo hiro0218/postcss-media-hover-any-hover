@@ -193,6 +193,8 @@ test('handles :not() before :hover', async () => {
 });
 
 test('does not transform :has() with :hover child (no hover on parent)', async () => {
+  // :hover inside :has() applies to the child element (a), not the parent (div).
+  // Since the div itself doesn't have :hover, we shouldn't wrap this rule.
   await run('div:has(> a:hover) { background: yellow; }', 'div:has(> a:hover) { background: yellow; }');
 });
 
