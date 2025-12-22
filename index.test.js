@@ -110,12 +110,18 @@ test('supports mediaFeature option', async () => {
   });
 });
 
-test('supports transformNestedMedia option', async () => {
-  await run(
+test('ignores transformNestedMedia option (removed in v0.5.0)', async () => {
+  // The transformNestedMedia option is silently ignored (no warning issued)
+  // to maintain backward compatibility for users who still have it in their config
+  const result = await postcss([plugin({ transformNestedMedia: true })]).process(
     '@media (any-hover: hover) { a:hover { color: purple; } }',
-    '@media (any-hover: hover) { @media (any-hover: hover) { a:hover { color: purple; } } }',
-    { transformNestedMedia: true },
+    { from: undefined },
   );
+
+  // Verify no warnings are issued (silent ignore)
+  equal(result.warnings().length, 0);
+  // Verify transformation still works correctly
+  equal(result.css, '@media (any-hover: hover) { a:hover { color: purple; } }');
 });
 
 test('supports excludeSelectors option', async () => {
@@ -124,4 +130,190 @@ test('supports excludeSelectors option', async () => {
     '.special:hover { color: red; } @media (any-hover: hover) { a:hover { color: blue; } }',
     { excludeSelectors: ['.special:hover'] },
   );
+});
+
+// Edge case tests for :hover detection
+test('handles :hover::before pseudo-element', async () => {
+  await run('a:hover::before { content: "→"; }', '@media (any-hover: hover) {a:hover::before { content: "→"; } }');
+});
+
+test('handles :hover::after pseudo-element', async () => {
+  await run('button:hover::after { opacity: 1; }', '@media (any-hover: hover) {button:hover::after { opacity: 1; } }');
+});
+
+test('handles :hover[href] attribute selector', async () => {
+  await run('a:hover[href] { color: blue; }', '@media (any-hover: hover) {a:hover[href] { color: blue; } }');
+});
+
+test('handles :hover#id ID selector', async () => {
+  await run(
+    'button:hover#submit { background: green; }',
+    '@media (any-hover: hover) {button:hover#submit { background: green; } }',
+  );
+});
+
+test('handles :hover.class class selector', async () => {
+  await run(
+    'a:hover.active { font-weight: bold; }',
+    '@media (any-hover: hover) {a:hover.active { font-weight: bold; } }',
+  );
+});
+
+test('handles :hover with general sibling combinator', async () => {
+  await run(
+    'button:hover ~ .tooltip { opacity: 1; }',
+    '@media (any-hover: hover) {button:hover ~ .tooltip { opacity: 1; } }',
+  );
+});
+
+// Modern CSS pseudo-class tests
+test('handles :is() with :hover', async () => {
+  await run(
+    ':is(a, button):hover { color: blue; }',
+    '@media (any-hover: hover) {:is(a, button):hover { color: blue; } }',
+  );
+});
+
+test('does not transform :not(:hover)', async () => {
+  await run('a:not(:hover) { opacity: 0.5; }', 'a:not(:hover) { opacity: 0.5; }');
+});
+
+test('handles :where() with :hover', async () => {
+  await run(
+    ':where(a, button):hover { opacity: 0.8; }',
+    '@media (any-hover: hover) {:where(a, button):hover { opacity: 0.8; } }',
+  );
+});
+
+test('handles :not() before :hover', async () => {
+  await run(
+    'a:not(.disabled):hover { color: green; }',
+    '@media (any-hover: hover) {a:not(.disabled):hover { color: green; } }',
+  );
+});
+
+test('does not transform :has() with :hover child (no hover on parent)', async () => {
+  // :hover inside :has() applies to the child element (a), not the parent (div).
+  // Since the div itself doesn't have :hover, we shouldn't wrap this rule.
+  await run('div:has(> a:hover) { background: yellow; }', 'div:has(> a:hover) { background: yellow; }');
+});
+
+test('handles :has() selector itself with :hover', async () => {
+  await run(
+    'div:has(> a):hover { background: gray; }',
+    '@media (any-hover: hover) {div:has(> a):hover { background: gray; } }',
+  );
+});
+
+// Attribute selector tests
+test('handles attribute selector before :hover', async () => {
+  await run(
+    'a[href]:hover { text-decoration: underline; }',
+    '@media (any-hover: hover) {a[href]:hover { text-decoration: underline; } }',
+  );
+});
+
+test('handles complex attribute selector with :hover', async () => {
+  await run(
+    'input[type="submit"]:hover { cursor: pointer; }',
+    '@media (any-hover: hover) {input[type="submit"]:hover { cursor: pointer; } }',
+  );
+});
+
+test('handles multiple attribute selectors with :hover', async () => {
+  await run(
+    'a[href][target="_blank"]:hover { color: orange; }',
+    '@media (any-hover: hover) {a[href][target="_blank"]:hover { color: orange; } }',
+  );
+});
+
+test('handles attribute selector with operator variations', async () => {
+  await run(
+    'a[class^="btn"]:hover { transform: scale(1.05); }',
+    '@media (any-hover: hover) {a[class^="btn"]:hover { transform: scale(1.05); } }',
+  );
+});
+
+// excludeSelectors substring collision tests (these will fail with current implementation)
+test('excludeSelectors should not match substrings - :hover pattern', async () => {
+  await run(
+    'a:not(:hover) { color: gray; } a:hover { color: blue; }',
+    'a:not(:hover) { color: gray; } @media (any-hover: hover) { a:hover { color: blue; } }',
+    { excludeSelectors: [':hover'] },
+  );
+});
+
+test('excludeSelectors should not match substrings - class pattern', async () => {
+  await run(
+    '.my-button:hover { background: red; } .button:hover { background: blue; }',
+    '@media (any-hover: hover) {.my-button:hover { background: red; } } @media (any-hover: hover) { .button:hover { background: blue; } }',
+    { excludeSelectors: ['button'] },
+  );
+});
+
+test('excludeSelectors exact match should work correctly', async () => {
+  await run(
+    '.exact-match:hover { color: red; } a:hover { color: blue; }',
+    '.exact-match:hover { color: red; } @media (any-hover: hover) { a:hover { color: blue; } }',
+    { excludeSelectors: ['.exact-match:hover'] },
+  );
+});
+
+test('excludeSelectors with RegExp should work', async () => {
+  await run(
+    '.no-transform-1:hover { color: red; } .no-transform-2:hover { color: green; } a:hover { color: blue; }',
+    '.no-transform-1:hover { color: red; } .no-transform-2:hover { color: green; } @media (any-hover: hover) { a:hover { color: blue; } }',
+    { excludeSelectors: [/^\.no-transform-/] },
+  );
+});
+
+test('excludeSelectors with multiple RegExp patterns', async () => {
+  await run(
+    '.exclude-a:hover { color: red; } .exclude-b:hover { color: green; } a:hover { color: blue; }',
+    '.exclude-a:hover { color: red; } .exclude-b:hover { color: green; } @media (any-hover: hover) { a:hover { color: blue; } }',
+    { excludeSelectors: [/\.exclude-a:hover/, /\.exclude-b:hover/] },
+  );
+});
+
+// Options validation tests
+test('warns on invalid mediaFeature option', async () => {
+  const result = await postcss([plugin({ mediaFeature: 'invalid' })]).process('a:hover { color: red; }', {
+    from: undefined,
+  });
+
+  equal(result.warnings().length, 1);
+  equal(result.warnings()[0].text.includes('Invalid mediaFeature'), true);
+  // Should still work with default
+  equal(result.css, '@media (any-hover: hover) {a:hover { color: red; } }');
+});
+
+test('warns on invalid excludeSelectors type', async () => {
+  const result = await postcss([plugin({ excludeSelectors: 'not-an-array' })]).process('a:hover { color: red; }', {
+    from: undefined,
+  });
+
+  equal(result.warnings().length, 1);
+  equal(result.warnings()[0].text.includes('excludeSelectors'), true);
+});
+
+test('filters out invalid patterns in excludeSelectors', async () => {
+  const result = await postcss([
+    plugin({
+      excludeSelectors: ['.valid:hover', 123, null, /pattern/, undefined],
+    }),
+  ]).process('.valid:hover { color: red; } a:hover { color: blue; }', { from: undefined });
+
+  // Should warn about invalid patterns
+  const warnings = result.warnings();
+  equal(
+    warnings.some((w) => w.text.includes('excludeSelectors[1]')),
+    true,
+  );
+  equal(
+    warnings.some((w) => w.text.includes('excludeSelectors[2]')),
+    true,
+  );
+
+  // Should still work with valid patterns
+  equal(result.css, '.valid:hover { color: red; } @media (any-hover: hover) { a:hover { color: blue; } }');
 });
