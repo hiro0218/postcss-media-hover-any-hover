@@ -189,7 +189,7 @@ Key test scenarios:
 
 ### JavaScript (not TypeScript)
 
-Despite .github/copilot-instructions.md mentioning TypeScript, this project uses plain JavaScript with JSDoc comments for type hints.
+This project uses plain JavaScript with JSDoc comments for type hints rather than TypeScript.
 
 ### Formatting
 
